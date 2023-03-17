@@ -216,6 +216,12 @@ class GoogleAnalyticsDataApiBaseStream(GoogleAnalyticsDataApiAbstractStream):
         start_date = stream_state and stream_state.get(self.cursor_field)
         if start_date:
             start_date = utils.string_to_date(start_date, self._record_date_format, old_format=DATE_FORMAT)
+
+            # Using a lookback window to have issues with the attribution delay
+            lookback_window = self.config.get("lookback_window")
+            if lookback_window:
+                start_date = start_date - datetime.timedelta(days=self.config["lookback_window"])
+                
             start_date = max(start_date, self.config["date_ranges_start_date"])
         else:
             start_date = self.config["date_ranges_start_date"]
